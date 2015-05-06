@@ -24,10 +24,12 @@ class RunGA():
         self.gen = 0
         # get cities
         citiestxt = 'input/100cities.txt'
+        distancestxt = 'input/distances.txt'
         self.city_coordinates = np.loadtxt(citiestxt, skiprows = 1, usecols = (2,3), ndmin = 2)
         self.city_names = np.loadtxt(citiestxt, dtype = String, skiprows = 1, usecols = (0,), ndmin = 1)
         self.cityNamesCoordinates = np.loadtxt(citiestxt, dtype = String, skiprows = 1, usecols = (0,2,3), ndmin = 2)
         self.citiesFull = np.loadtxt(citiestxt, dtype = String, skiprows = 1, ndmin = 2)
+        self.distances =  np.loadtxt(distancestxt, dtype = String, skiprows = 1, usecols = (0,1,2), ndmin = 2)
 
         pass
 
@@ -56,16 +58,11 @@ class RealValued(RunGA):
         # Gather class variables
         self.popsize = popsize
         self.shallIprint = 0
-        #print "ga init start: Creating initial Population"
-        #init temparray
-        self.population = []#[i for i in range(self.popsize)]# create empty array
+        self.population = []
         for i in range(0, self.popsize):
             self.numberOfCities = np.r_[0:len(self.city_coordinates)]
             np.random.shuffle(self.numberOfCities)
             self.population.append(individual.individual(position = self.numberOfCities))
-            #print self.population[i].position
-            #print self.getCityFitness(self.city_coordinates, self.population[i].position)
-        #print self.population[i]
         self.stop_reached = False
         pass
 
@@ -144,7 +141,6 @@ class RealValued(RunGA):
         for popMut in range (1, len(self.population)):
             if (random.uniform(0, 1) <= self.mutationChance):
                 randomPos = random.randint(0, len(self.city_coordinates)-1)
-                randomPos2 = random.randint(0, len(self.city_coordinates)-1)
                 if randomPos != 99:
                     tmp = self.population[popMut].position[randomPos]
                     self.population[popMut].position[randomPos] = self.population[popMut].position[randomPos+1]
@@ -156,19 +152,21 @@ class RealValued(RunGA):
                 else:
                     print "mutation error"
 
-
-        #self.printAvgFitness()
-#        self.printPop()
         self.shallIprint = self.shallIprint+1
-        if self.shallIprint%100 == 0:
-            print"Best individual= "+str(self.printBestIndividual())+"\tafter only "+str(self.current_iteration)+" Iterations"
+        if self.shallIprint%15 == 0:
+            print"Best individual=; "+str(self.printBestIndividual())+";\tafter only=; "+str(self.current_iteration)+"; Iterations; \t popsize=; "+str(self.popsize)+"; tournamentSize=;"+str(self.selectionPopsize)+";\tmutationChance=; "+str(self.mutationChance)+"crossoverChance=; 0.9"
 
-
-
-##numVities 50 posize 30 selectionPressure2 mitationrate 1,15*1/numOfCitiess  mutationPower =0,2 maxGen=500
     def stop(self):
         return self.stop_reached
         pass
+    def fitnessGenerator(self, cities):
+        for i in range(len(cities)):
+            for j in range(len(cities)):
+              #  print "Distance from city "+str(i)+" to city "+str(j)+" :  "+str(self.getDistance(cities, i, j))+"."
+                print "\t"+str(i)+"\t"+str(j)+"\t"+str(self.getDistance(cities, i, j))+""
+
+    def fitnessCaller(self):
+        print self.distances
 
     def getCityFitness(self, cities, route):
         cities = cities
