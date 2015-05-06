@@ -44,7 +44,7 @@ def main():
     tsm2 = TSM.RealValued(popsize=popsize[1], max_iterations = max_iterations, selectionPopsize=selectionPopsize[1], mutationChance=mutationChance[1], crossoverChance=crossoverChance)
     tsm2.fitnessCaller()
     '''
-    print"" finaly""
+    print "finaly"
     tsm2 = TSM.RealValued(popsize=50, max_iterations = max_iterations, selectionPopsize=3, mutationChance=0.5, crossoverChance=crossoverChance)
     #ga.printPop()
     tsm2.run()
