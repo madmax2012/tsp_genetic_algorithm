@@ -29,7 +29,7 @@ class RunGA():
         self.city_names = np.loadtxt(citiestxt, dtype = String, skiprows = 1, usecols = (0,), ndmin = 1)
         self.cityNamesCoordinates = np.loadtxt(citiestxt, dtype = String, skiprows = 1, usecols = (0,2,3), ndmin = 2)
         self.citiesFull = np.loadtxt(citiestxt, dtype = String, skiprows = 1, ndmin = 2)
-        self.distances =  np.loadtxt(distancestxt, dtype = String, skiprows = 1, usecols = (0,1,2), ndmin = 2)
+        self.distances =  np.loadtxt(distancestxt, dtype = String, skiprows = 1, usecols = (0,3), ndmin = 2)
 
         pass
 
@@ -151,25 +151,48 @@ class RealValued(RunGA):
                     self.population[popMut].position[0] = tmp
                 else:
                     print "mutation error"
-
         self.shallIprint = self.shallIprint+1
-        if self.shallIprint%15 == 0:
-            print"Best individual=; "+str(self.printBestIndividual())+";\tafter only=; "+str(self.current_iteration)+"; Iterations; \t popsize=; "+str(self.popsize)+"; tournamentSize=;"+str(self.selectionPopsize)+";\tmutationChance=; "+str(self.mutationChance)+"crossoverChance=; 0.9"
+        if self.shallIprint%10000 == 0:
+            print"Best individual=; "+str(self.printBestIndividual())+";\tafter only=; "+str(self.current_iteration)+"; Iterations; \t popsize=; "+str(self.popsize)+"; tournamentSize=;"+str(self.selectionPopsize)+";\tmutationChance=; "+str(self.mutationChance)+";\tcrossoverChance=; 0.9"
 
     def stop(self):
         return self.stop_reached
         pass
     def fitnessGenerator(self, cities):
+       # self.FitnessArray = [x for x in range(10000), y for y in range(10000)]
+        print self.FitnessArray
         for i in range(len(cities)):
             for j in range(len(cities)):
               #  print "Distance from city "+str(i)+" to city "+str(j)+" :  "+str(self.getDistance(cities, i, j))+"."
-                print "\t"+str(i)+"\t"+str(j)+"\t"+str(self.getDistance(cities, i, j))+""
+              ij = i*j
+              print ij
+              self.FitnessArray[int(ij), 1] = 3#  float((self.getDistance(cities, i, j)))
+             # rint self.FitnessArray[int(str(cities[i])+""+str(cities[j])), self.getDistance(cities, i, j)]
+              # print str(i)+""+str(j)+"\t"+str(i)+"\t"+str(j)+"\t"+str(self.getDistance(cities, i, j))+""
 
     def fitnessCaller(self):
-        print self.distances
+        self.fitnessGenerator(self.city_coordinates)
+        #rint self.distances
+        #rint self.distances[2,0] #index
+            #rint self.distances[2,1] #distance##  pass
+      # self.getCityFitnessFromFile(self.city_coordinates, self.city_coordinates)
+
+
+
+
+    def getCityFitnessFromFile(self, cities, route):
+        self.totalFitness=0
+        for i in range(100):
+           print   ""+str(int(str(route[i])+""+str(route[i+1])))+""
+           for j in range(len(self.distances)):
+             if (int(str(route[i])+""+str(route[i+1]))) == self.distances[j,0]:
+                print   ""+str(int(str(route[i])+""+str(route[i+1])))+" = "+str(self.distances[j,0])
+                #self.totalFitness = self.getDistance(cities, route[self.distances[]], route[i+1])
+        self.totalFitness = self.totalFitness+self.getDistanceToZero(cities, route[99])
+
 
     def getCityFitness(self, cities, route):
-        cities = cities
+        cities
         self.totalFitness=0
         for i in range(len(route)-1):
             if (i <= 98):
