@@ -55,7 +55,6 @@ class RealValued(RunGA):
         RunGA.__init__(self, *args,**kwargs)
         # Gather class variables
         self.popsize = popsize
-        self.shallIprint = 0
         #print "ga init start: Creating initial Population"
         #init temparray
         self.population = []#[i for i in range(self.popsize)]# create empty array
@@ -109,11 +108,11 @@ class RealValued(RunGA):
         for replacer in range (len(self.population)):
             self.parent1 = np.empty
             self.parent2 = np.empty
-            if replacer ==0:
+            self.numberOfElites = (int((1-self.crossoverChance)*self.popsize))+1
+            if  replacer < self.numberOfElites:
                 self.tempArray.append(self.population[self.returnBestIndividualPOS()])
                 pass
             else:
-                #if (random.uniform(0, 1) <= self.crossoverChance):
                 for i in range(0,self.tournamentSize):
                     self.randomParentCandidate = self.population[random.randint(0, len(self.population)-1)]
                     if self.parent1==np.empty:
@@ -142,26 +141,29 @@ class RealValued(RunGA):
              self.population[i]=self.tempArray[i]
 
         for popMut in range (1, len(self.population)):
-            if (random.uniform(0, 1) <= self.mutationChance):
-                randomPos = random.randint(0, len(self.city_coordinates)-1)
-                randomPos2 = random.randint(0, len(self.city_coordinates)-1)
-                if randomPos != 99:
-                    tmp = self.population[popMut].position[randomPos]
-                    self.population[popMut].position[randomPos] = self.population[popMut].position[randomPos+1]
-                    self.population[popMut].position[randomPos+1] = tmp
-                elif randomPos == 99:
-                    tmp = self.population[popMut].position[randomPos]
-                    self.population[popMut].position[randomPos] = self.population[popMut].position[0]
-                    self.population[popMut].position[0] = tmp
-                else:
-                    print "mutation error"
+            if  popMut < self.numberOfElites:
+                pass
+            else:
+                if (random.uniform(0, 1) <= self.mutationChance):
+                    randomPos = random.randint(0, len(self.city_coordinates)-1)
+                    randomPos2 = random.randint(0, len(self.city_coordinates)-1)
+                    if randomPos != 99:
+                        tmp = self.population[popMut].position[randomPos]
+                        self.population[popMut].position[randomPos] = self.population[popMut].position[randomPos+1]
+                        self.population[popMut].position[randomPos+1] = tmp
+                    elif randomPos == 99:
+                        tmp = self.population[popMut].position[randomPos]
+                        self.population[popMut].position[randomPos] = self.population[popMut].position[0]
+                        self.population[popMut].position[0] = tmp
+                    else:
+                        print "mutation error"
+
 
 
         #self.printAvgFitness()
 #        self.printPop()
-        self.shallIprint = self.shallIprint+1
-        if self.shallIprint%100 == 0:
-            print"Best individual= "+str(self.printBestIndividual())+"\tafter only "+str(self.current_iteration)+" Iterations"
+        if self.current_iteration%10 == 0:
+            print"Best individual=; "+str(self.printBestIndividual())+";\tafter only=; "+str(self.current_iteration)+"; Iterations; \t popsize=; "+str(self.popsize)+"; tournamentSize=;"+str(self.selectionPopsize)+";\tmutationChance=; "+str(self.mutationChance)+";\tcrossoverChance=; 0.9"
 
 
 
