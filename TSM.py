@@ -143,25 +143,21 @@ class RealValued(RunGA):
 
         ###Mutation
         ##keep the elites  and mutate all remaining individuals
-        for popMut in range (1, len(self.population)):
-            if  popMut < self.numberOfElites:
-                pass
-
-            else:
-                for gene in range(100):
-                    if (random.uniform(0, 1) <= self.mutationChance):
-                        randomPos = random.randint(0, len(self.city_coordinates)-1)
-                        randomPos2 = random.randint(0, len(self.city_coordinates)-1)
-                        tmp = self.population[popMut].position[randomPos]
-                        self.population[popMut].position[randomPos] = self.population[popMut].position[randomPos2]
-                        self.population[popMut].position[randomPos2] = tmp
+        for popMut in range (2, len(self.population)):
+            for gene in range(100):
+                if (random.uniform(0, 1) <= self.mutationChance):
+                    randomPos = random.randint(0, len(self.city_coordinates)-1)
+                    randomPos2 = random.randint(0, len(self.city_coordinates)-1)
+                    tmp = self.population[popMut].position[randomPos]
+                    self.population[popMut].position[randomPos] = self.population[popMut].position[randomPos2]
+                    self.population[popMut].position[randomPos2] = tmp
 
 
 
 
         if self.current_iteration == 1:
             print "mutation chance:;"+str(self.mutationChance)+"Current Run:;"+str(self.runval)+";Current Iteration:; "+str(self.current_iteration)+"; Best Individual:; "+str(self.printBestIndividual())+"; populations average fitness:; "+str(self.printAvgFitness())+";"
-        if ((self.current_iteration <=10000)and(self.current_iteration%200==0)):
+        if ((self.current_iteration <=10000)and(self.current_iteration%25==0)):
             print "mutation chance:;"+str(self.mutationChance)+"Current Run:;"+str(self.runval)+";Current Iteration:; "+str(self.current_iteration)+"; Best Individual:; "+str(self.printBestIndividual())+"; populations average fitness:; "+str(self.printAvgFitness())+";"
         if self.current_iteration%1000 == 0:
             print "mutation chance:;"+str(self.mutationChance)+"Current Run:;"+str(self.runval)+";Current Iteration:; "+str(self.current_iteration)+"; Best Individual:; "+str(self.printBestIndividual())+"; populations average fitness:; "+str(self.printAvgFitness())+";"

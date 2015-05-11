@@ -18,8 +18,8 @@ def main():
     # Data file and path definitions
 
     # Optimization parameters
-    max_iterations = 2000
-    numberOfRuns = 10
+    max_iterations = 1000
+    numberOfRuns = 30
 
     popsize = [30]#50
     selectionPopsize= [3]
@@ -31,8 +31,8 @@ def main():
 
     i=0
     for j in range(len(mutationChance)):
-        tsm2 = TSM.RealValued(popsize=30, max_iterations = max_iterations, selectionPopsize=3, mutationChance=mutationChance[j], crossoverChance=0.9, runval=i)
-        tsm2.run()
+        tsm = TSM.RealValued(popsize=30, max_iterations = max_iterations, selectionPopsize=3, mutationChance=0.8, crossoverChance=0.9, runval=i)
+        tsm.run()
 
     #ga.printPop()
 
