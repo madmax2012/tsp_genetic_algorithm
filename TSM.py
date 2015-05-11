@@ -8,6 +8,7 @@ import logging
 import operator
 import shutil
 import glob
+import matplotlib.pyplot as plt
 import  math
 import individual
 from datashape.coretypes import String
@@ -15,13 +16,14 @@ from datashape.coretypes import String
 import numpy as np
 
 class RunGA():
-    def __init__(self, max_iterations, selectionPopsize, mutationChance, crossoverChance):
+    def __init__(self, max_iterations, selectionPopsize, mutationChance, crossoverChance, runval):
         self.max_iterations = max_iterations
         self.selectionPopsize=selectionPopsize
         self.crossoverChance=crossoverChance
         self.mutationChance=mutationChance
         self.current_iteration = 0
         self.gen = 0
+        self.runval=runval
         # get cities
         citiestxt = 'input/100cities.txt'
         self.city_coordinates = np.loadtxt(citiestxt, skiprows = 1, usecols = (2,3), ndmin = 2)
@@ -62,9 +64,6 @@ class RealValued(RunGA):
             self.numberOfCities = np.r_[0:len(self.city_coordinates)]
             np.random.shuffle(self.numberOfCities)
             self.population.append(individual.individual(position = self.numberOfCities))
-            #print self.population[i].position
-            #print self.getCityFitness(self.city_coordinates, self.population[i].position)
-        #print self.population[i]
         self.stop_reached = False
         pass
 
@@ -76,7 +75,7 @@ class RealValued(RunGA):
         self.totalFitness =0.0
         for i in range(0, len(self.population)):
             self.totalFitness = self.totalFitness + self.getCityFitness(self.city_coordinates, self.population[i].position)
-        print "average fitness= "+str(self.totalFitness/len(self.population))
+        return (self.totalFitness/len(self.population))
 
     def printBestIndividual(self):
         self.leader = np.empty
@@ -101,19 +100,20 @@ class RealValued(RunGA):
         self.current_iteration = self.current_iteration + 1
         if self.current_iteration >= self.max_iterations:
             self.stop_reached = True
-################################################### Tournement selection start
+
+################################################### Tournament selection
         self.tournamentSize = self.selectionPopsize
-        self.tempArray = []#[i for i in range(popsize)]# create empty array
+        self.tempArray = []# create empty array to gather children
 
         for replacer in range (len(self.population)):
             self.parent1 = np.empty
             self.parent2 = np.empty
             self.numberOfElites = (int((1-self.crossoverChance)*self.popsize))+1
-            if  replacer < self.numberOfElites:
+            if  replacer < self.numberOfElites: ##keep the elites
                 self.tempArray.append(self.population[self.returnBestIndividualPOS()])
                 pass
             else:
-                for i in range(0,self.tournamentSize):
+                for i in range(0,self.tournamentSize):##select parents in tournament
                     self.randomParentCandidate = self.population[random.randint(0, len(self.population)-1)]
                     if self.parent1==np.empty:
                         self.parent1=self.randomParentCandidate
@@ -123,6 +123,7 @@ class RealValued(RunGA):
                         self.parent1=self.randomParentCandidate
 
                 arra = []
+                ##crossover by splitting in the middle
                 for i in range(0, len(self.parent1.position)/2):
                     arra.append(self.parent1.position[i])
                 for i in range(len(self.parent2.position)):
@@ -136,41 +137,49 @@ class RealValued(RunGA):
                 else:
                     print "array arra to small"
 
-
+        ##write the new generation to the population array
         for i in range(len(self.tempArray)):
              self.population[i]=self.tempArray[i]
 
+        ###Mutation
+        ##keep the elites  and mutate all remaining individuals
         for popMut in range (1, len(self.population)):
             if  popMut < self.numberOfElites:
                 pass
+
             else:
-                if (random.uniform(0, 1) <= self.mutationChance):
-                    randomPos = random.randint(0, len(self.city_coordinates)-1)
-                    randomPos2 = random.randint(0, len(self.city_coordinates)-1)
-                    if randomPos != 99:
+                for gene in range(100):
+                    if (random.uniform(0, 1) <= self.mutationChance):
+                        randomPos = random.randint(0, len(self.city_coordinates)-1)
+                        randomPos2 = random.randint(0, len(self.city_coordinates)-1)
                         tmp = self.population[popMut].position[randomPos]
-                        self.population[popMut].position[randomPos] = self.population[popMut].position[randomPos+1]
-                        self.population[popMut].position[randomPos+1] = tmp
-                    elif randomPos == 99:
-                        tmp = self.population[popMut].position[randomPos]
-                        self.population[popMut].position[randomPos] = self.population[popMut].position[0]
-                        self.population[popMut].position[0] = tmp
-                    else:
-                        print "mutation error"
+                        self.population[popMut].position[randomPos] = self.population[popMut].position[randomPos2]
+                        self.population[popMut].position[randomPos2] = tmp
 
 
 
-        #self.printAvgFitness()
-#        self.printPop()
-        if self.current_iteration%10 == 0:
-            print"Best individual=; "+str(self.printBestIndividual())+";\tafter only=; "+str(self.current_iteration)+"; Iterations; \t popsize=; "+str(self.popsize)+"; tournamentSize=;"+str(self.selectionPopsize)+";\tmutationChance=; "+str(self.mutationChance)+";\tcrossoverChance=; 0.9"
+
+        if self.current_iteration == 1:
+            print "mutation chance:;"+str(self.mutationChance)+"Current Run:;"+str(self.runval)+";Current Iteration:; "+str(self.current_iteration)+"; Best Individual:; "+str(self.printBestIndividual())+"; populations average fitness:; "+str(self.printAvgFitness())+";"
+        if ((self.current_iteration <=10000)and(self.current_iteration%200==0)):
+            print "mutation chance:;"+str(self.mutationChance)+"Current Run:;"+str(self.runval)+";Current Iteration:; "+str(self.current_iteration)+"; Best Individual:; "+str(self.printBestIndividual())+"; populations average fitness:; "+str(self.printAvgFitness())+";"
+        if self.current_iteration%1000 == 0:
+            print "mutation chance:;"+str(self.mutationChance)+"Current Run:;"+str(self.runval)+";Current Iteration:; "+str(self.current_iteration)+"; Best Individual:; "+str(self.printBestIndividual())+"; populations average fitness:; "+str(self.printAvgFitness())+";"
+        if self.current_iteration == self.max_iterations:
+            print self.population[self.returnBestIndividualPOS()].position
+            citys = np.loadtxt("input/100cities.txt", delimiter="\t", skiprows=1, dtype=[('name','S15'),('pop','i8'),('lat','f8'),('lng','f8')])
+            self.printTsp(self.population[self.returnBestIndividualPOS()].position, citys[['name','lat','lng']])
+            print"Best individual=; "+str(self.printBestIndividual())+";\tafter only=; "+str(self.current_iteration)+"; Iterations; \t popsize=; "+str(self.popsize)+"; tournamentSize=;"+str(self.selectionPopsize)+";\tmutationChance=; "+str(self.mutationChance)+";\tcrossoverChance=; 0.9\n\n\n\n\n\n\n\n\n\n\n\n"
 
 
 
-##numVities 50 posize 30 selectionPressure2 mitationrate 1,15*1/numOfCitiess  mutationPower =0,2 maxGen=500
     def stop(self):
         return self.stop_reached
         pass
+
+    def printTsp(self, track, citys):
+        for c in track:
+            print citys[c]
 
     def getCityFitness(self, cities, route):
         cities = cities
